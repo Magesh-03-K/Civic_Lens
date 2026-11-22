@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Internal planning and agent instructions
+CivicLens Transparent Civic Grievance & Infrastructure Triage.md
+AGENTS.md
+DEPLOYMENT.md
+

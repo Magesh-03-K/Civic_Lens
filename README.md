@@ -3,7 +3,25 @@
 > **Transparent Civic Grievance & Infrastructure Triage Platform**  
 > *Developed for the IDEA//FORGE Online Hackathon (Madurai, Tamil Nadu, India context).*
 
-CivicLens transforms traditional, opaque civic complaint systems into an open, explainable, and accountable municipal response platform. Powered by Google Gemini multimodal AI, spatial deduplication, and an objective severity scoring engine, CivicLens streamlines citizen reporting while eliminating backlogs and false closures.
+[![Live Web Application](https://img.shields.io/badge/Live%20App-civiclens.vercel.app-2563eb?style=for-the-badge&logo=vercel)](https://civiclens-powgrfqmj-magesh-k.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Civic__Lens-181717?style=for-the-badge&logo=github)](https://github.com/Magesh-03-K/Civic_Lens)
+
+🌐 **Live Application URL:** [https://civiclens-powgrfqmj-magesh-k.vercel.app](https://civiclens-powgrfqmj-magesh-k.vercel.app)
+
+---
+
+## 📌 Project Summary
+
+CivicLens transforms traditional, slow, and opaque civic complaint portals into a real-time, explainable, and accountable municipal response system tailored for Madurai, Tamil Nadu. 
+
+Citizens report infrastructure hazards—such as deep road potholes, snapped electrical cables, raw sewage overflows, open manholes, drinking water pipe bursts, and garbage mounds—in seconds using photos or voice notes in Tamil or English. The platform operates with **zero personal data collection** (no citizen names, phone numbers, or emails required) and automatically strips sensitive EXIF GPS metadata client-side before upload.
+
+### Core Breakthroughs:
+1. **Multimodal AI Vision & Audio Triage:** Powered by Google Gemini 2.5 Flash, evidence is evaluated across 10 categories and rated on 4 objective severity factors (Safety Risk, Population Impact, Urgency/Spread, Location Sensitivity). If AI is unreachable, an intelligent deterministic keyword fallback classifies and scores the incident safely.
+2. **Deterministic 0–100 Severity Scoring:** Removes human bias and opaque prioritization through an open mathematical formula with strict SLA timeframes: P1 (24 Hours), P2 (72 Hours), P3 (7 Days), and P4 (14 Days). A built-in time decay multiplier dynamically escalates neglected tickets so issues never rot in backlog.
+3. **50-Meter Spatial Deduplication:** When multiple citizens photograph the same pothole or hazard within 50 meters, CivicLens automatically merges the submissions into a single ticket, boosting its community priority signal rather than creating duplicate work orders.
+4. **Automated Municipal Routing:** Tickets are dispatched immediately to 6 Madurai Corporation and state agency departments with full dispatch audit trails.
+5. **Closed-Loop Resolution Verification:** Authorities upload a post-repair "After" photo, which Gemini vision compares against the original "Before" photo to verify that the defect was genuinely fixed at the same coordinates before allowing the ticket to close.
 
 ---
 
