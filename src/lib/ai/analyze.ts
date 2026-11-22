@@ -75,13 +75,17 @@ export async function analyzeCivicMedia(
     },
   ];
 
-  let promptText = `Analyze this civic issue report (${mediaType}).`;
+  let promptText = `System Instructions:
+${CIVIC_TRIAGE_SYSTEM_INSTRUCTION}
+
+Task: Analyze this civic issue report (${mediaType}).`;
   if (userText?.trim()) {
     promptText += `\nUser provided text: "${userText.trim()}"`;
   }
   if (categoryHint?.trim()) {
     promptText += `\nUser hinted category: "${categoryHint.trim()}"`;
   }
+  promptText += `\n\nReturn ONLY a valid JSON object matching the required schema.`;
 
   contents.push({ text: promptText });
 

@@ -31,7 +31,7 @@ export interface CallGeminiOptions {
  * and fallback model support.
  */
 export async function callGeminiWithRetry(options: CallGeminiOptions): Promise<string> {
-  const primaryModel = options.model || process.env.GEMINI_MODEL || 'gemini-flash-latest';
+  const primaryModel = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   const fallbackModel = process.env.GEMINI_FALLBACK_MODEL;
 
   const attemptCall = async (targetModel: string, contents: unknown): Promise<string> => {

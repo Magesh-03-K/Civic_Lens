@@ -14,6 +14,7 @@ import {
   ArrowRight,
   RefreshCw,
   MapPin,
+  LocateFixed,
 } from 'lucide-react';
 import { compressImage } from '@/lib/client/compressImage';
 import { convertTo16kHzMonoWav } from '@/lib/client/toWav';
@@ -39,6 +40,17 @@ interface SubmittedTicketData {
   needsHumanReview: boolean;
   trackingUrl: string;
 }
+
+const MADURAI_LANDMARKS = [
+  { name: 'Meenakshi Temple', coords: [9.9195, 78.1193] as [number, number] },
+  { name: 'Periyar Bus Stand', coords: [9.9150, 78.1130] as [number, number] },
+  { name: 'Goripalayam', coords: [9.9400, 78.1330] as [number, number] },
+  { name: 'Anna Nagar', coords: [9.9260, 78.1450] as [number, number] },
+  { name: 'Simmakkal', coords: [9.9260, 78.1200] as [number, number] },
+  { name: 'Arapalayam', coords: [9.9390, 78.1110] as [number, number] },
+  { name: 'K. K. Nagar', coords: [9.9330, 78.1500] as [number, number] },
+  { name: 'Thirunagar', coords: [9.8890, 78.0790] as [number, number] },
+];
 
 export default function ReportPage() {
   // Step state
@@ -521,25 +533,73 @@ export default function ReportPage() {
             </div>
 
             {/* Step 2: Location Pinning */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
+            <div className="mb-6 space-y-2">
+              <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Step 2: Verify Incident Location
+                  Step 2: Incident Location in Madurai
                 </label>
-                <span className="text-xs text-slate-500 flex items-center gap-1">
+                <span className="text-xs text-blue-700 font-mono font-bold flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-blue-600" />
                   {coords[0].toFixed(4)}, {coords[1].toFixed(4)}
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mb-2">{geoStatus}</p>
+
+              {/* Quick Landmark Presets */}
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                  <span>Quick Pick Madurai Location:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && navigator.geolocation) {
+                        setGeoStatus('Requesting GPS location...');
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => {
+                            setCoords([pos.coords.latitude, pos.coords.longitude]);
+                            setGeoStatus('Location pinned from device GPS.');
+                          },
+                          (err) => {
+                            setGeoStatus(`GPS unavailable (${err.message}). Choose a landmark or tap the map.`);
+                          },
+                          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                        );
+                      }
+                    }}
+                    className="text-blue-600 font-bold hover:underline inline-flex items-center gap-1"
+                  >
+                    <LocateFixed className="w-3 h-3" />
+                    Use Device GPS
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {MADURAI_LANDMARKS.map((landmark) => (
+                    <button
+                      key={landmark.name}
+                      type="button"
+                      onClick={() => {
+                        setCoords(landmark.coords);
+                        setGeoStatus(`Pinned to ${landmark.name}. Drag pin or tap map to fine-tune.`);
+                      }}
+                      className="px-2.5 py-1 text-xs rounded-md border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition"
+                    >
+                      {landmark.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 pt-1">{geoStatus}</p>
 
               <MapPicker
                 position={coords}
                 onPositionChange={(newPos) => {
                   setCoords(newPos);
-                  setGeoStatus('Location pinned manually.');
+                  setGeoStatus('Location pinned on map.');
                 }}
               />
+              <p className="text-[11px] text-slate-400 italic">
+                * Click anywhere on the map or drag the blue marker to place the incident location.
+              </p>
             </div>
 
             {/* Step 3: Optional Text & Category */}

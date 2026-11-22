@@ -17,7 +17,7 @@ const LeafletInnerMap = dynamic(
     ]);
 
     const L = leafletMod.default || leafletMod;
-    const { MapContainer, TileLayer, Marker, useMapEvents } = reactLeafletMod;
+    const { MapContainer, TileLayer, Marker, useMap, useMapEvents } = reactLeafletMod;
 
     const customPin = L.divIcon({
       className: 'custom-map-pin',
@@ -32,6 +32,22 @@ const LeafletInnerMap = dynamic(
       iconSize: [32, 32],
       iconAnchor: [16, 32],
     });
+
+    function MapRecenter({ position }: { position: [number, number] }) {
+      const map = useMap();
+      const [lastLat, lastLng] = position;
+
+      useMapEvents({
+        click(e) {
+          map.panTo(e.latlng);
+        },
+      });
+
+      // Pan to new coordinates when position changes externally
+      map.panTo([lastLat, lastLng]);
+
+      return null;
+    }
 
     function DraggableMarker({
       position,
@@ -74,6 +90,7 @@ const LeafletInnerMap = dynamic(
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapRecenter position={position} />
           <DraggableMarker position={position} onPositionChange={onPositionChange} />
         </MapContainer>
       );
