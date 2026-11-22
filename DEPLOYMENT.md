@@ -1,6 +1,17 @@
-# CivicLens Deployment Guide (Vercel & Supabase)
+# CivicLens Deployment Guide (Vercel & Render)
 
-This guide walks you through deploying **CivicLens** to production on **Vercel** with a **Supabase** backend.
+This guide walks you through deploying **CivicLens** to production on **Vercel** (recommended by the hackathon spec) or **Render** with a **Supabase** backend.
+
+---
+
+## Which Platform Should You Choose?
+
+| Feature | Vercel (Recommended) | Render |
+| :--- | :--- | :--- |
+| **Hackathon Spec** | Explicitly specified in the project prompt | Works, but not the default hackathon target |
+| **Next.js App Router** | Native zero-config support (built by Vercel) | Runs via Node server (`npm start`) |
+| **Cold Starts (Free Tier)** | **Zero cold starts** (Serverless functions) | **Spins down after 15 min** (takes 50s+ to wake up for judges) |
+| **Best For** | Instant response, optimal performance | Standard Docker / Node container hosting |
 
 ---
 
@@ -11,7 +22,7 @@ Before deploying, ensure you have:
 2. **Supabase Account**: A Supabase project created (preferably in the **South Asia / Mumbai** region).
 3. **Google AI Studio Key**: A Gemini API key from [Google AI Studio](https://aistudio.google.com/).
 4. **Resend Account**: An API key from [Resend](https://resend.com/) for simulated dispatch emails.
-5. **Vercel Account**: An account on [Vercel](https://vercel.com/) linked to your GitHub.
+5. **Hosting Account**: Either [Vercel](https://vercel.com/) or [Render](https://render.com/).
 
 ---
 
@@ -45,9 +56,9 @@ Go to **Project Settings** -> **API** and copy:
 
 ---
 
-## 3. Deploying to Vercel
+## 3A. Option A: Deploy to Vercel (Recommended)
 
-### Step 3.1: Import Project into Vercel
+### Step 3A.1: Import Project into Vercel
 1. Log in to [Vercel](https://vercel.com/dashboard).
 2. Click **Add New...** -> **Project**.
 3. Find your GitHub repository `Magesh-03-K/Civic_Lens` and click **Import**.
@@ -57,12 +68,56 @@ Go to **Project Settings** -> **API** and copy:
    - **Build Command**: `npm run build` (auto-detected)
    - **Output Directory**: `.next` (auto-detected)
 
-### Step 3.2: Configure Environment Variables
-Expand the **Environment Variables** section on Vercel and add the following keys (set for both **Production** and **Preview**):
+### Step 3A.2: Configure Environment Variables
+Expand the **Environment Variables** section on Vercel and add the keys (see table in Section 4 below).
 
-| Variable Name | Value / Description | Example |
+### Step 3A.3: Disable Deployment Protection (Crucial for Public Access)
+1. In your Vercel Project, go to **Settings** -> **Deployment Protection**.
+2. Ensure **Vercel Authentication** is **Disabled** (Off) so the site is accessible to anyone without requiring a Vercel login.
+
+### Step 3A.4: Deploy!
+Click **Deploy**.
+
+---
+
+## 3B. Option B: Deploy to Render
+
+If you prefer deploying on Render:
+
+### Step 3B.1: Create a Web Service
+1. Log in to [Render Dashboard](https://dashboard.render.com/).
+2. Click **New +** -> **Web Service**.
+3. Connect your GitHub account and select `Magesh-03-K/Civic_Lens`.
+4. Configure the service settings:
+   - **Name**: `civiclens` (or your choice)
+   - **Region**: Singapore or nearest
+   - **Branch**: `main`
+   - **Root Directory**: Leave blank (default `./`)
+   - **Runtime**: `Node`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
+   - **Instance Type**: `Free`
+
+### Step 3B.2: Configure Environment Variables on Render
+Under the **Environment Variables** section on Render, add the environment variables listed in Section 4 below. Note: Set `NEXT_PUBLIC_SITE_URL` to `https://<your-service-name>.onrender.com`.
+
+### Step 3B.3: Node Version
+Add this environment variable so Render uses Node 20+:
+- Key: `NODE_VERSION`
+- Value: `20.18.0` (or `22`)
+
+### Step 3B.4: Deploy!
+Click **Create Web Service**. Render will install packages, run the Next.js build, and start the service.
+
+---
+
+## 4. Environment Variables Reference
+
+Add these variables to either Vercel or Render:
+
+| Variable Name | Description | Example |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_SITE_URL` | Your live Vercel production URL | `https://civiclens.vercel.app` (or temporary `https://<project>.vercel.app`) |
+| `NEXT_PUBLIC_SITE_URL` | Your live production URL | `https://civiclens.vercel.app` or `https://civiclens.onrender.com` |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL | `https://xyzcompany.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase public anon key | `eyJhbGciOi...` |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role secret key | `eyJhbGciOi...` |
@@ -75,26 +130,12 @@ Expand the **Environment Variables** section on Vercel and add the following key
 | `AUTHORITY_PASSCODE` | Passcode for municipal authority portal | `civic-admin-secret-2026` |
 | `SESSION_SECRET` | 32+ character random string for auth cookie | `e9f8a3c2b1d0...` |
 
-> [!IMPORTANT]
-> If you do not know your final Vercel domain yet:
-> 1. Set `NEXT_PUBLIC_SITE_URL` to `https://localhost:3000` temporarily.
-> 2. Complete deployment.
-> 3. Once Vercel gives you the assigned domain (e.g., `https://civic-lens-xyz.vercel.app`), go to **Project Settings** -> **Environment Variables**, update `NEXT_PUBLIC_SITE_URL` with that URL, and trigger a **Redeploy**.
-
-### Step 3.3: Disable Deployment Protection (Crucial for Public Access)
-Since CivicLens is a public civic platform for citizens and hackathon evaluators:
-1. In your Vercel Project, go to **Settings** -> **Deployment Protection**.
-2. Ensure **Vercel Authentication** is **Disabled** (Off) so the site is accessible to anyone without requiring a Vercel login.
-
-### Step 3.4: Deploy!
-Click **Deploy**. Vercel will compile the Next.js App Router project using Turbopack and deploy to Mumbai (`bom1`) edge as defined in `vercel.json`.
-
 ---
 
-## 4. Post-Deployment Verification
+## 5. Post-Deployment Verification
 
 1. **Verify Health Endpoint**:
-   Visit: `https://<your-vercel-domain>/api/health`
+   Visit: `https://<your-deployed-domain>/api/health`
    You should see:
    ```json
    {
@@ -106,18 +147,6 @@ Click **Deploy**. Vercel will compile the Next.js App Router project using Turbo
      "missingEnvKeys": []
    }
    ```
-   If `environmentReady` is `false`, check `missingEnvKeys` and ensure all required variables are set in the Vercel dashboard.
-
 2. **Verify Public Homepage**:
-   Visit: `https://<your-vercel-domain>/`
-   Verify that the page renders cleanly on both desktop and mobile viewports.
+   Visit: `https://<your-deployed-domain>/`
 
----
-
-## 5. Ongoing Updates
-
-Every time you push commits to GitHub:
-```bash
-git push origin main
-```
-Vercel will automatically build and deploy the update with zero downtime.
