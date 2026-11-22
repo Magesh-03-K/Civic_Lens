@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="100%" height="100%" style="font-family: system-ui, -apple-system, sans-serif;">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#334155" stroke-width="0.5" stroke-opacity="0.3" />
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="400" fill="url(#bgGrad)" rx="16" />
+  <rect width="600" height="400" fill="url(#grid)" rx="16" />
+
+  <!-- Outer frame border -->
+  <rect x="12" y="12" width="576" height="376" rx="12" fill="none" stroke="#10b981" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="none" />
+
+  <!-- Top Badges -->
+  <g transform="translate(24, 28)">
+    <!-- Status Pill -->
+    <rect x="0" y="0" width="220" height="28" rx="14" fill="#064e3b" stroke="#10b981" stroke-width="1.5" />
+    <text x="14" y="19" fill="#10b981" font-size="11" font-weight="bold" letter-spacing="0.5">✓ REPAIR COMPLETED (AFTER)</text>
+
+    <!-- Watermark Pill -->
+    <rect x="320" y="0" width="220" height="28" rx="6" fill="#18181b" stroke="#3f3f46" stroke-width="1" />
+    <text x="332" y="18" fill="#fbbf24" font-size="10" font-weight="700" letter-spacing="0.5">★ SAMPLE SEED MEDIA</text>
+  </g>
+
+  <!-- Visual Centerpiece -->
+  <g transform="translate(150, 90)">
+    <rect x="0" y="0" width="300" height="170" rx="12" fill="#0b1120" stroke="#334155" stroke-width="1" />
+    
+    <!-- Horizon / Ground line -->
+    <line x1="20" y1="120" x2="280" y2="120" stroke="#475569" stroke-width="2" />
+
+    
+      <!-- Resolved graphic state -->
+      <circle cx="150" cy="80" r="36" fill="#065f46" stroke="#10b981" stroke-width="2" />
+      <path d="M 138 80 L 146 88 L 164 70" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+      <rect x="60" y="124" width="180" height="8" rx="4" fill="#10b981" opacity="0.8" />
+      <text x="150" y="145" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="600">Site Restored &amp; Cleared</text>
+    
+  </g>
+
+  <!-- Category & Details Card -->
+  <g transform="translate(36, 285)">
+    <rect x="0" y="0" width="528" height="85" rx="10" fill="#0f172a" fill-opacity="0.9" stroke="#334155" stroke-width="1" />
+    
+    <text x="20" y="28" fill="#f8fafc" font-size="16" font-weight="bold">Pothole / Damaged Road</text>
+    <text x="20" y="48" fill="#94a3b8" font-size="12">குண்டும் குழியுமான சாலை</text>
+    <text x="20" y="68" fill="#64748b" font-size="11" font-style="italic">Post-repair inspection verified by Municipal Authority.</text>
+
+    <!-- Location Stamp -->
+    <text x="508" y="28" text-anchor="end" fill="#38bdf8" font-size="11" font-weight="600">Madurai City Municipal Corp</text>
+    <text x="508" y="48" text-anchor="end" fill="#64748b" font-size="10">Geo-Tagged &amp; Timestamped</text>
+  </g>
+</svg>
