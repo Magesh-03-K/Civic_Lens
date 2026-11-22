@@ -8,7 +8,7 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY is required'),
   SUPABASE_BUCKET: z.string().default('civic-media'),
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required'),
-  GEMINI_MODEL: z.string().default('gemini-flash-latest'),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
   GEMINI_FALLBACK_MODEL: z.string().optional(),
   RESEND_API_KEY: z.string().min(1, 'RESEND_API_KEY is required'),
   DEMO_INBOX_EMAIL: z.string().email('DEMO_INBOX_EMAIL must be a valid email'),
