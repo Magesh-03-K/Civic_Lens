@@ -13,7 +13,7 @@ export function getGeminiClient(): GoogleGenAI {
     throw new Error('GEMINI_API_KEY environment variable is missing.');
   }
 
-  geminiClient = new GoogleGenAI({ apiKey });
+  geminiClient = new GoogleGenAI({ apiKey, apiVersion: 'v1beta' });
   return geminiClient;
 }
 
