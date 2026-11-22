@@ -12,6 +12,7 @@ import {
   generateTicketId,
 } from '@/lib/severity';
 import { sendSimulatedDispatchEmail } from '@/lib/email';
+import { FactorScores } from '@/lib/ai/schemas';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -26,6 +27,167 @@ const CreateReportSchema = z.object({
   categoryHint: z.string().optional(),
 });
 
+interface DepartmentRow {
+  id: number;
+  slug: string;
+  name: string;
+}
+
+interface ReportRow {
+  id: string;
+  ticket_id: string;
+  category: string;
+  title: string;
+  summary: string;
+  lat: number;
+  lng: number;
+  address: string | null;
+  status: string;
+  media_path: string | null;
+  media_type: string | null;
+  factor_scores: FactorScores;
+  report_count: number;
+  is_seed: boolean;
+  needs_human_review: boolean;
+  created_at: string;
+  sla_due_at: string;
+  resolved_at: string | null;
+  departments?: DepartmentRow | null;
+}
+
+/**
+ * GET /api/reports: Public list of reports with live severity scores and SLA status.
+ * Filters: status, priority, category, department, q, limit.
+ * Security: NEVER returns user_text, transcripts, dispatch bodies or department emails.
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const statusParam = searchParams.get('status');
+    const priorityParam = searchParams.get('priority');
+    const categoryParam = searchParams.get('category');
+    const departmentParam = searchParams.get('department');
+    const queryParam = searchParams.get('q');
+    const limitParam = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '50', 10)));
+
+    const supabase = getServiceSupabase();
+
+    let query = supabase
+      .from('reports')
+      .select(`
+        id,
+        ticket_id,
+        category,
+        title,
+        summary,
+        lat,
+        lng,
+        address,
+        status,
+        media_path,
+        media_type,
+        factor_scores,
+        report_count,
+        is_seed,
+        needs_human_review,
+        created_at,
+        sla_due_at,
+        resolved_at,
+        departments (
+          id,
+          slug,
+          name
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(limitParam);
+
+    if (statusParam) {
+      query = query.eq('status', statusParam);
+    }
+    if (categoryParam) {
+      query = query.eq('category', categoryParam);
+    }
+    if (departmentParam) {
+      if (/^\d+$/.test(departmentParam)) {
+        query = query.eq('department_id', parseInt(departmentParam, 10));
+      } else {
+        // Query by department slug
+        query = query.eq('departments.slug', departmentParam);
+      }
+    }
+    if (queryParam) {
+      const q = `%${queryParam.trim()}%`;
+      query = query.or(`title.ilike.${q},summary.ilike.${q},address.ilike.${q},ticket_id.ilike.${q}`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching reports list:', error);
+      return NextResponse.json({ ok: false, error: 'Failed to retrieve reports.' }, { status: 500 });
+    }
+
+    const now = new Date();
+
+    // Map public fields & compute live dynamic severity
+    const reports = ((data as unknown as ReportRow[]) || []).map((r) => {
+      const liveSeverity = calculateSeverity({
+        factors: r.factor_scores,
+        reportCount: r.report_count,
+        createdAt: r.created_at,
+        resolvedAt: r.resolved_at,
+        now,
+      });
+
+      const slaDueDate = new Date(r.sla_due_at);
+      const isBreached = r.resolved_at
+        ? new Date(r.resolved_at).getTime() > slaDueDate.getTime()
+        : now.getTime() > slaDueDate.getTime();
+
+      return {
+        ticketId: r.ticket_id,
+        category: r.category,
+        title: r.title,
+        summary: r.summary,
+        lat: r.lat,
+        lng: r.lng,
+        address: r.address,
+        status: r.status,
+        priority: liveSeverity.priority,
+        score: liveSeverity.score,
+        reportCount: r.report_count,
+        createdAt: r.created_at,
+        resolvedAt: r.resolved_at,
+        slaDueAt: r.sla_due_at,
+        slaBreached: isBreached,
+        departmentName: r.departments?.name || 'Municipal Grievance Cell',
+        thumbnailUrl: mediaUrl(r.media_path),
+        mediaType: r.media_type,
+        isSeed: r.is_seed,
+        needsHumanReview: r.needs_human_review,
+      };
+    });
+
+    // If filtered by priority, filter post-computation
+    const filteredReports = priorityParam
+      ? reports.filter((r) => r.priority === priorityParam.toUpperCase())
+      : reports;
+
+    return NextResponse.json({
+      ok: true,
+      data: filteredReports,
+    });
+  } catch (err) {
+    console.error('Unexpected error in GET /api/reports:', err);
+    return NextResponse.json({ ok: false, error: 'Internal server error.' }, { status: 500 });
+  }
+}
+
+/**
+ * POST /api/reports: Citizen report ingestion pipeline.
+ */
 export async function POST(req: NextRequest) {
   const supabase = getServiceSupabase();
   const bucket = process.env.SUPABASE_BUCKET || 'civic-media';
